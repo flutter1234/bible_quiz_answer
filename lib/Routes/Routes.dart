@@ -1,4 +1,5 @@
 import 'package:bible_quiz_answer/Screen/Category_screen/category_screen.dart';
+import 'package:bible_quiz_answer/Screen/History_screen/history_screen.dart';
 import 'package:bible_quiz_answer/Screen/Home_screen/home_screen.dart';
 import 'package:bible_quiz_answer/Screen/Quiz_screen/quiz_screen.dart';
 import 'package:bible_quiz_answer/Screen/Splash_screen/splash_screen.dart';
@@ -23,12 +24,18 @@ class Router {
           builder: (_) => quiz_screen(
             oneData: settings.arguments['oneCategory'],
             oneCategoryName: settings.arguments['oneCategoryName'],
+            CategoryName: settings.arguments['CategoryName'],
           ),
         );
       case category_screen.routeName:
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => category_screen(data: settings.arguments['data'], Testament: settings.arguments['Testament']),
+        );
+      case history_screen.routeName:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => history_screen(),
         );
       default:
         return MaterialPageRoute(

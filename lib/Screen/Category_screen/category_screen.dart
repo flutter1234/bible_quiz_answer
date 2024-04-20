@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
+import '../../main.dart';
 
 class category_screen extends StatefulWidget {
   static const routeName = '/category_screen';
@@ -20,13 +21,17 @@ class category_screen extends StatefulWidget {
 }
 
 class _category_screenState extends State<category_screen> {
-  List keyList = [];
-
   @override
   void initState() {
+    Api dataProvider = Provider.of<Api>(context, listen: false);
+    dataProvider.passCategory = storage.read(widget.Testament) ?? [];
+    dataProvider.keyList.clear();
     widget.data.forEach((element) {
-      keyList.addAll(element.keys.toList());
+      dataProvider.keyList.addAll(element.keys.toList());
     });
+    dataProvider.passCategory.isEmpty ? dataProvider.passCategory.add(dataProvider.keyList[0]) : null;
+    storage.write(widget.Testament, dataProvider.passCategory);
+    print("passCategory ====>>>>>>>${dataProvider.passCategory}");
     super.initState();
   }
 
@@ -38,41 +43,48 @@ class _category_screenState extends State<category_screen> {
       child: Scaffold(
         extendBody: true,
         appBar: AppBar(
+          toolbarHeight: isIpad ? 30.sp : 35.sp,
           centerTitle: true,
           backgroundColor: Colors.transparent,
-          leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-              setState(() {});
-            },
-            child: Icon(
-              Icons.arrow_back_ios,
-              color: Colors.white,
-              size: 20.sp,
+          leading: Padding(
+            padding: EdgeInsets.only(left: isIpad ? 10.w : 0),
+            child: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {});
+              },
+              icon: Icon(
+                Icons.arrow_back_ios,
+                size: 18.sp,
+                color: Colors.white,
+              ),
             ),
           ),
           title: Text(
             '${widget.Testament}',
             style: GoogleFonts.rubik(
-              fontSize: 25.sp,
+              fontSize: isIpad ? 20.sp : 25.sp,
               color: Colors.white,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
         body: GridView.builder(
-          padding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 12.sp),
+          padding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 5.sp),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            mainAxisExtent: 75.sp,
+            mainAxisExtent: isIpad ? 65.sp : 75.sp,
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
           ),
-          itemCount: keyList.length,
+          itemCount: dataProvider.keyList.length,
           itemBuilder: (context, index) {
             return GestureDetector(
-              onTap: () {
+              onTap: /*dataProvider.passCategory.contains(dataProvider.keyList[index])
+                  ?*/
+                  () {
                 dataProvider.questionIndex = 0;
+                dataProvider.rightAnswer = 0;
                 AdsRN().showFullScreen(
                   context: context,
                   onComplete: () {
@@ -80,37 +92,76 @@ class _category_screenState extends State<category_screen> {
                       context,
                       quiz_screen.routeName,
                       arguments: {
-                        "oneCategory": widget.data[index][keyList[index]],
-                        "oneCategoryName": keyList[index],
+                        "oneCategory": widget.data[index][dataProvider.keyList[index]],
+                        "oneCategoryName": index,
+                        "CategoryName": widget.Testament,
                       },
-                    );
+                    ).then((value) {
+                      dataProvider.passCategory = storage.read(widget.Testament) ?? [];
+                      setState(() {});
+                    });
                   },
                 );
                 setState(() {});
                 // print("${widget.data[index][keyList[index]]}");
                 // print("${keyList[index]}");
               },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(width: 1.w, color: Colors.white),
-                  color: HexColor('006292'),
-                ),
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 5.sp),
-                    child: Text(
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      '${keyList[index]}',
-                      style: GoogleFonts.rubik(
-                        fontSize: 18.sp,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
+              // : () {
+              //     Fluttertoast.showToast(
+              //       msg: "Pass The Previous Level First",
+              //       toastLength: Toast.LENGTH_SHORT,
+              //       gravity: ToastGravity.BOTTOM,
+              //       timeInSecForIosWeb: 1,
+              //       backgroundColor: HexColor('006386'),
+              //       textColor: Colors.white,
+              //       fontSize: isIpad  ? 10.sp:14.sp,
+              //     );
+              //   },
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(width: 1.w, color: Colors.white),
+                      color: HexColor('006292'),
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 5.sp),
+                        child: Text(
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          '${dataProvider.keyList[index]}',
+                          style: GoogleFonts.rubik(
+                            fontSize: isIpad
+                                ? 16.sp
+                                : isSmall
+                                    ? 16.sp
+                                    : 18.sp,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  if (!dataProvider.passCategory.contains(dataProvider.keyList[index])) ...{
+                    Container(
+                      height: 1.sh,
+                      width: 1.sw,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(width: 1.w, color: Colors.white),
+                        color: Colors.black54,
+                      ),
+                      child: Icon(
+                        Icons.lock,
+                        size: 35.sp,
+                        color: Colors.white,
+                      ),
+                    ),
+                  }
+                ],
               ),
             );
           },

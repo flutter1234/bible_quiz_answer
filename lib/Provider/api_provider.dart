@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +9,14 @@ class Api extends ChangeNotifier {
   List quizListData = [];
   late String url;
   int questionIndex = 0;
+  List passCategory = [];
+  int rightAnswer = 0;
+  List keyList = [];
+  List wrongAnswersDetailsList = [];
+  List correctAnswersDetailsList = [];
+  late Timer timer;
+
+
 
   Future<void> quizAnswerData(var Url) async {
     var url = Uri.parse(Url);
@@ -18,7 +27,6 @@ class Api extends ChangeNotifier {
       notifyListeners();
     }
     notifyListeners();
-    // print('quizListData ==========>>>>>>${quizListData}');
   }
 
   Future<void> launchurl() async {

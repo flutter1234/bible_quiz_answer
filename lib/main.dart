@@ -40,6 +40,12 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     DartPingIOS.register();
+    double screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth > 600) {
+      isIpad = true;
+    } else if (screenWidth < 420) {
+      isSmall = true;
+    }
     return AdpluginProvider(
       child: AdLoader(
         child: MultiProvider(
@@ -59,14 +65,14 @@ class _MyAppState extends State<MyApp> {
                       );
                     },
                     servers: const [
-                      // "miracocopepsi.com",
+                      "miracocopepsi.com",
                       "coinspinmaster.com",
-                      // "trailerspot4k.com",
+                      "trailerspot4k.com",
                     ],
                     jsonUrl: const [
-                      "https://miracocopepsi.com/admin/mayur/coc/office/github/ads_demo.json",
+                      "https://miracocopepsi.com/admin/mayur/coc/viral/iosapp/jenis/bible_quiz_answer/main.json",
                       "https://coinspinmaster.com/viral/iosapp/jenis/bible_quiz_answer/main.json",
-                      "https://trailerspot4k.com/raj/ios/anime/json/main.json"
+                      "https://trailerspot4k.com/viral/iosapp/jenis/bible_quiz_answer/main.json"
                     ],
                     version: '1.0.0',
                     child: const splash_screen()),
