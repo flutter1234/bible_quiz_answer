@@ -80,14 +80,22 @@ class _setting_screenState extends State<setting_screen> {
                         children: [
                           Icon(
                             Icons.lock_person_rounded,
-                            size: isIpad ? 30.sp : 32.sp,
+                            size: isIpad
+                                ? 30.sp
+                                : isSmall
+                                    ? 30.sp
+                                    : 32.sp,
                             color: Colors.grey.shade300,
                           ),
                           SizedBox(width: 20.w),
                           Text(
                             'Privacy Policy',
                             style: GoogleFonts.rubik(
-                              fontSize: isIpad ? 20.sp : 24.sp,
+                              fontSize: isIpad
+                                  ? 20.sp
+                                  : isSmall
+                                      ? 20.sp
+                                      : 24.sp,
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                             ),
@@ -121,14 +129,22 @@ class _setting_screenState extends State<setting_screen> {
                         children: [
                           Icon(
                             Icons.contact_page_rounded,
-                            size: isIpad ? 30.sp : 32.sp,
+                            size: isIpad
+                                ? 30.sp
+                                : isSmall
+                                    ? 30.sp
+                                    : 32.sp,
                             color: Colors.grey.shade300,
                           ),
                           SizedBox(width: 20.w),
                           Text(
                             'Contactus',
                             style: GoogleFonts.rubik(
-                              fontSize: isIpad ? 20.sp : 24.sp,
+                              fontSize: isIpad
+                                  ? 20.sp
+                                  : isSmall
+                                      ? 20.sp
+                                      : 24.sp,
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                             ),
@@ -162,14 +178,22 @@ class _setting_screenState extends State<setting_screen> {
                         children: [
                           Icon(
                             Icons.star_rate,
-                            size: isIpad ? 30.sp : 32.sp,
+                            size: isIpad
+                                ? 30.sp
+                                : isSmall
+                                    ? 30.sp
+                                    : 32.sp,
                             color: Colors.grey.shade300,
                           ),
                           SizedBox(width: 20.w),
                           Text(
                             'RateUs',
                             style: GoogleFonts.rubik(
-                              fontSize: isIpad ? 20.sp : 24.sp,
+                              fontSize: isIpad
+                                  ? 20.sp
+                                  : isSmall
+                                      ? 20.sp
+                                      : 24.sp,
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                             ),
@@ -203,14 +227,22 @@ class _setting_screenState extends State<setting_screen> {
                         children: [
                           Icon(
                             Icons.feedback_sharp,
-                            size: isIpad ? 30.sp : 32.sp,
+                            size: isIpad
+                                ? 30.sp
+                                : isSmall
+                                    ? 30.sp
+                                    : 32.sp,
                             color: Colors.grey.shade300,
                           ),
                           SizedBox(width: 20.w),
                           Text(
                             'Share App',
                             style: GoogleFonts.rubik(
-                              fontSize: isIpad ? 20.sp : 24.sp,
+                              fontSize: isIpad
+                                  ? 20.sp
+                                  : isSmall
+                                      ? 20.sp
+                                      : 24.sp,
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                             ),
@@ -247,14 +279,22 @@ class _setting_screenState extends State<setting_screen> {
                         children: [
                           Icon(
                             Icons.history_sharp,
-                            size: isIpad ? 30.sp : 32.sp,
+                            size: isIpad
+                                ? 30.sp
+                                : isSmall
+                                    ? 30.sp
+                                    : 32.sp,
                             color: Colors.grey.shade300,
                           ),
                           SizedBox(width: 20.w),
                           Text(
                             'History',
                             style: GoogleFonts.rubik(
-                              fontSize: isIpad ? 22.sp : 24.sp,
+                              fontSize: isIpad
+                                  ? 22.sp
+                                  : isSmall
+                                      ? 22.sp
+                                      : 24.sp,
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                             ),
