@@ -4,6 +4,7 @@ import 'package:bible_quiz_answer/Provider/api_provider.dart';
 import 'package:bible_quiz_answer/Screen/Quiz_screen/quiz_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
@@ -81,42 +82,41 @@ class _category_screenState extends State<category_screen> {
           itemBuilder: (context, index) {
             return GestureDetector(
               onTap: /*dataProvider.passCategory.contains(dataProvider.keyList[index])
-                  ?*/
-                  () {
-                dataProvider.questionIndex = 0;
-                dataProvider.rightAnswer = 0;
-                AdsRN().showFullScreen(
-                  context: context,
-                  onComplete: () {
-                    Navigator.pushNamed(
-                      context,
-                      quiz_screen.routeName,
-                      arguments: {
-                        "oneCategory": widget.data[index][dataProvider.keyList[index]],
-                        "oneCategoryName": index,
-                        "CategoryName": widget.Testament,
-                      },
-                    ).then((value) {
-                      dataProvider.passCategory = storage.read(widget.Testament) ?? [];
+                  ?*/ () {
+                      dataProvider.questionIndex = 0;
+                      dataProvider.rightAnswer = 0;
+                      AdsRN().showFullScreen(
+                        context: context,
+                        onComplete: () {
+                          Navigator.pushNamed(
+                            context,
+                            quiz_screen.routeName,
+                            arguments: {
+                              "oneCategory": widget.data[index][dataProvider.keyList[index]],
+                              "oneCategoryName": index,
+                              "CategoryName": widget.Testament,
+                            },
+                          ).then((value) {
+                            dataProvider.passCategory = storage.read(widget.Testament) ?? [];
+                            setState(() {});
+                          });
+                        },
+                      );
                       setState(() {});
-                    });
-                  },
-                );
-                setState(() {});
-                // print("${widget.data[index][keyList[index]]}");
-                // print("${keyList[index]}");
-              },
-              // : () {
-              //     Fluttertoast.showToast(
-              //       msg: "Pass The Previous Level First",
-              //       toastLength: Toast.LENGTH_SHORT,
-              //       gravity: ToastGravity.BOTTOM,
-              //       timeInSecForIosWeb: 1,
-              //       backgroundColor: HexColor('006386'),
-              //       textColor: Colors.white,
-              //       fontSize: isIpad  ? 10.sp:14.sp,
-              //     );
-              //   },
+                      // print("${widget.data[index][keyList[index]]}");
+                      // print("${keyList[index]}");
+                    },
+                  /*: () {
+                      Fluttertoast.showToast(
+                        msg: "You Are Not Available For This Level",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.BOTTOM,
+                        timeInSecForIosWeb: 1,
+                        backgroundColor: HexColor('006386'),
+                        textColor: Colors.white,
+                        fontSize: isIpad ? 10.sp : 12.sp,
+                      );
+                    },*/
               child: Stack(
                 children: [
                   Container(

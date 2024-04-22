@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:bible_quiz_answer/AdPlugin/Ads/Banner/BannerWrapper.dart';
 import 'package:bible_quiz_answer/AdPlugin/Ads/FullScreen/Ads.dart';
@@ -32,34 +30,62 @@ class _quiz_screenState extends State<quiz_screen> {
   String selectAnswer = "";
   String trueAnswer = "";
   int wrongLife = 5;
+  DateTime? lastRecordedTime;
 
   @override
   void initState() {
     Api dataProvider = Provider.of<Api>(context, listen: false);
-
     dataProvider.passCategory = storage.read(widget.CategoryName) ?? [];
     dataProvider.wrongAnswersDetailsList = storage.read("wrongAnswersDetailsList") ?? [];
     dataProvider.correctAnswersDetailsList = storage.read("correctAnswersDetailsList") ?? [];
     wrongLife = storage.read(dataProvider.keyList[widget.oneCategoryName]) ?? 5;
+    String? lastRecordedTimeString = storage.read('lastRecordedTime');
+    lastRecordedTime = lastRecordedTimeString != null ? DateTime.parse(lastRecordedTimeString) : null;
+    // print("lastRecordTime ====>>>${lastRecordedTime}");
     wrongLifeGenerate();
-    print("wrongLife =====>>${wrongLife}");
     super.initState();
   }
 
-  wrongLifeGenerate() {
+  void wrongLifeGenerate() {
     Api dataProvider = Provider.of<Api>(context, listen: false);
+    if (wrongLife < 5) {
+      if (lastRecordedTime == null) {
+        lastRecordedTime = DateTime.now();
+        storage.write('lastRecordedTime', lastRecordedTime!.toIso8601String());
+        // print("lastRecordedTime =====>>>>${lastRecordedTime}");
+      }
+    }
 
-    dataProvider.timer = Timer.periodic(Duration(seconds: 5), (timer) {
-      if (wrongLife < 5) {
-        if (this.mounted) {
-          setState(() {
-            wrongLife++;
-            print("timer= ====>>${timer}");
-            storage.write(dataProvider.keyList[widget.oneCategoryName], wrongLife);
-          });
+    if (lastRecordedTime != null) {
+      String? lastRecordedTimeString = storage.read('lastRecordedTime');
+      if (lastRecordedTimeString != null) {
+        DateTime storedLastRecordedTime = DateTime.parse(lastRecordedTimeString);
+        print("storedLastRecordedTime ==========>>${storedLastRecordedTime}");
+        DateTime currentTime = DateTime.now();
+        print("currentTime =======>>>${currentTime}");
+        int timeDifference = currentTime.difference(storedLastRecordedTime).inMinutes;
+        print("time difference: $timeDifference");
+
+        if (timeDifference >= 1) {
+          int increments = timeDifference ~/ 1;
+          print("increment =======>>>${increments}");
+          int updatedLife = wrongLife + increments;
+          if (updatedLife <= 5) {
+            setState(() {
+              wrongLife = updatedLife;
+              storage.write(dataProvider.keyList[widget.oneCategoryName], wrongLife);
+              print("wrongLife updated: $wrongLife");
+            });
+          } else {
+            setState(() {
+              wrongLife = 5;
+              storage.write(dataProvider.keyList[widget.oneCategoryName], wrongLife);
+              print("wrongLife capped at 5: $wrongLife");
+            });
+          }
         }
       }
-    });
+    }
   }
 
   @override
@@ -159,6 +185,7 @@ class _quiz_screenState extends State<quiz_screen> {
               ),
               itemCount: 4,
               shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) {
                 return Bounce(
                   duration: Duration(milliseconds: 200),
@@ -172,10 +199,14 @@ class _quiz_screenState extends State<quiz_screen> {
                         dataProvider.rightAnswer++;
                         storeCorrectAnswerDetails(widget.oneData[dataProvider.questionIndex]);
                       } else {
-                        wrongLife = wrongLife - 1;
-                        storage.write(dataProvider.keyList[widget.oneCategoryName], wrongLife);
-                        print("wrongLife ==========>>>${wrongLife}");
-                        storeWrongAnswerDetails(widget.oneData[dataProvider.questionIndex]);
+                        if (wrongLife != 0) {
+                          wrongLife = wrongLife - 1;
+                          storage.write(dataProvider.keyList[widget.oneCategoryName], wrongLife);
+                          print("wrongLife ==========>>>${wrongLife}");
+                          storeWrongAnswerDetails(widget.oneData[dataProvider.questionIndex]);
+                        }
+                        lastRecordedTime = DateTime.now();
+                        storage.write('lastRecordedTime', lastRecordedTime!.toIso8601String());
                       }
                       if (dataProvider.passCategory.length != dataProvider.keyList.length) {
                         if (dataProvider.rightAnswer == ((widget.oneData.length * 60) / 100).round()) {
@@ -202,23 +233,24 @@ class _quiz_screenState extends State<quiz_screen> {
                     ),
                     child: Center(
                       child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.sp),
-                          child: AutoSizeText(
-                            textAlign: TextAlign.center,
-                            '${widget.oneData[dataProvider.questionIndex]['answers'][index]}',
-                            style: GoogleFonts.rubik(
-                              fontSize: isIpad
-                                  ? 14.sp
-                                  : isSmall
-                                      ? 16.sp
-                                      : 18.sp,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            minFontSize: 12,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          )),
+                        padding: EdgeInsets.symmetric(horizontal: 8.sp),
+                        child: AutoSizeText(
+                          textAlign: TextAlign.center,
+                          '${widget.oneData[dataProvider.questionIndex]['answers'][index]}',
+                          style: GoogleFonts.rubik(
+                            fontSize: isIpad
+                                ? 14.sp
+                                : isSmall
+                                    ? 16.sp
+                                    : 18.sp,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          minFontSize: 12,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ),
                   ).animate().scaleXY(curve: Curves.bounceOut, duration: Duration(seconds: 3)),
                 );
@@ -324,7 +356,6 @@ class _quiz_screenState extends State<quiz_screen> {
                               nextButton = false;
                             },
                           );
-
                           setState(() {});
                         },
                         child: Padding(

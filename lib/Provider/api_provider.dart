@@ -14,7 +14,6 @@ class Api extends ChangeNotifier {
   List keyList = [];
   List wrongAnswersDetailsList = [];
   List correctAnswersDetailsList = [];
-  late Timer timer;
 
 
 
