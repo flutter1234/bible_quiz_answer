@@ -3,6 +3,7 @@ import 'package:bible_quiz_answer/AdPlugin/Ads/FullScreen/Ads.dart';
 import 'package:bible_quiz_answer/AdPlugin/MainJson/MainJson.dart';
 import 'package:bible_quiz_answer/Provider/api_provider.dart';
 import 'package:bible_quiz_answer/Screen/Category_screen/category_screen.dart';
+import 'package:bible_quiz_answer/Screen/History_screen/history_screen.dart';
 import 'package:bible_quiz_answer/Screen/Setting_screen/setting_screen.dart';
 import 'package:bible_quiz_answer/main.dart';
 import 'package:flutter/cupertino.dart';
@@ -46,7 +47,12 @@ class _home_screenState extends State<home_screen> {
                 ),
               )
             : Padding(
-                padding: EdgeInsets.only(top: isSmall ? 45.h : 50.h),
+                padding: EdgeInsets.only(
+                    top: isSmall
+                        ? 45.h
+                        : isIpad
+                            ? 10.h
+                            : 50.h),
                 child: Column(
                   children: [
                     Padding(
@@ -54,7 +60,22 @@ class _home_screenState extends State<home_screen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SizedBox(width: 30.w),
+                          GestureDetector(
+                            onTap: () {
+                              AdsRN().showFullScreen(
+                                context: context,
+                                onComplete: () {
+                                  Navigator.pushNamed(context, setting_screen.routeName);
+                                },
+                              );
+                              setState(() {});
+                            },
+                            child: Icon(
+                              Icons.settings,
+                              size: isIpad ? 25.sp : 30.sp,
+                              color: Colors.white,
+                            ),
+                          ),
                           Text(
                             'Bible Quiz',
                             style: GoogleFonts.rubik(
@@ -72,13 +93,13 @@ class _home_screenState extends State<home_screen> {
                               AdsRN().showFullScreen(
                                 context: context,
                                 onComplete: () {
-                                  Navigator.pushNamed(context, setting_screen.routeName);
+                                  Navigator.pushNamed(context, history_screen.routeName);
                                 },
                               );
                               setState(() {});
                             },
                             child: Icon(
-                              Icons.settings,
+                              Icons.history_outlined,
                               size: isIpad ? 25.sp : 30.sp,
                               color: Colors.white,
                             ),
@@ -86,7 +107,14 @@ class _home_screenState extends State<home_screen> {
                         ],
                       ),
                     ),
-                    Spacer(),
+                    Spacer(flex: 1),
+                    Image(
+                      fit: BoxFit.cover,
+                      height: 150.sp,
+                      width: 200.w,
+                      image: AssetImage('assets/images/quiz_logo.png'),
+                    ),
+                    Spacer(flex: 3),
                     Padding(
                       padding: EdgeInsets.all(5.sp),
                       child: GestureDetector(
@@ -175,7 +203,7 @@ class _home_screenState extends State<home_screen> {
                         ),
                       ),
                     ),
-                    Spacer(),
+                    Spacer(flex: 2),
                   ],
                 ),
               ),

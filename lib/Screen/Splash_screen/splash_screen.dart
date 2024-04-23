@@ -1,5 +1,3 @@
-import 'package:bible_quiz_answer/Provider/api_provider.dart';
-import 'package:bible_quiz_answer/Screen/Home_screen/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,18 +16,26 @@ class _splash_screenState extends State<splash_screen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Spacer(flex: 3),
           Center(
-            child: Text(
-              'Splash Screen',
-              style: GoogleFonts.rubik(
-                fontSize: 25.sp,
-                color: Colors.white,
-                fontWeight: FontWeight.w400,
-              ),
+            child: Image(
+              fit: BoxFit.cover,
+              height: 150.sp,
+              width: 200.w,
+              image: AssetImage('assets/images/quiz_logo.png'),
             ),
           ),
+          Spacer(flex: 2),
+          Text(
+            'Loading...',
+            style: GoogleFonts.rubik(
+              fontSize: 25.sp,
+              color: Colors.white,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          Spacer(),
         ],
       ),
     );

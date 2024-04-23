@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bounce/flutter_bounce.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_timer_countdown/flutter_timer_countdown.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +40,9 @@ class _quiz_screenState extends State<quiz_screen> {
   int totalStepCount = 30;
   bool resetDialog = false;
   bool lifeDialog = false;
+  late Timer timerHours;
+  late int currentTime;
+  bool resultDialog = false;
 
   @override
   void dispose() {
@@ -70,9 +74,29 @@ class _quiz_screenState extends State<quiz_screen> {
     wrongLife = storage.read(dataProvider.keyList[widget.oneCategoryName]) ?? 5;
     String? lastRecordedTimeString = storage.read('lastRecordedTime');
     lastRecordedTime = lastRecordedTimeString != null ? DateTime.parse(lastRecordedTimeString) : null;
-    // print("lastRecordTime ====>>>${lastRecordedTime}");
     wrongLifeGenerate();
+    currentTime = storage.read('timer- ${dataProvider.keyList[widget.oneCategoryName]}') ?? 3600;
+    // print("currentTime ======>>>>${currentTime}");
+    startTimer();
     super.initState();
+  }
+
+  void startTimer() {
+    Api dataProvider = Provider.of<Api>(context, listen: false);
+    if (wrongLife == 0) {
+      timerHours = Timer.periodic(Duration(seconds: 1), (timer) {
+        if (mounted) {
+          setState(() {
+            if (currentTime > 0) {
+              currentTime--;
+              storage.write('timer- ${dataProvider.keyList[widget.oneCategoryName]}', currentTime);
+            } else {
+              timerHours.cancel();
+            }
+          });
+        }
+      });
+    }
   }
 
   void wrongLifeGenerate() {
@@ -92,11 +116,10 @@ class _quiz_screenState extends State<quiz_screen> {
         print("storedLastRecordedTime ==========>>${storedLastRecordedTime}");
         DateTime currentTime = DateTime.now();
         print("currentTime =======>>>${currentTime}");
-        int timeDifference = currentTime.difference(storedLastRecordedTime).inHours;
+        int timeDifference = currentTime.difference(storedLastRecordedTime).inMinutes;
         print("time difference: $timeDifference");
-
-        if (timeDifference >= 1) {
-          int increments = timeDifference ~/ 1;
+        if (timeDifference >= 5) {
+          int increments = timeDifference ~/ 5;
           print("increment =======>>>${increments}");
           int updatedLife = wrongLife + increments;
           if (updatedLife <= 5) {
@@ -120,6 +143,8 @@ class _quiz_screenState extends State<quiz_screen> {
   @override
   Widget build(BuildContext context) {
     Api dataProvider = Provider.of<Api>(context, listen: true);
+    int minutes = (currentTime ~/ 60) % 60;
+    int seconds = currentTime % 60;
     return BannerWrapper(
       parentContext: context,
       child: Stack(
@@ -128,27 +153,44 @@ class _quiz_screenState extends State<quiz_screen> {
           Scaffold(
             extendBody: true,
             appBar: AppBar(
+              leadingWidth: 60.w,
               toolbarHeight: isIpad ? 30.sp : 35.sp,
               centerTitle: true,
               backgroundColor: Colors.transparent,
               leading: Padding(
-                padding: EdgeInsets.only(left: isIpad ? 10.w : 0),
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    setState(() {});
-                  },
-                  icon: Icon(
-                    Icons.arrow_back_ios,
-                    size: 18.sp,
-                    color: Colors.white,
-                  ),
+                padding: EdgeInsets.only(left: 10.w),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Image(
+                      fit: BoxFit.fill,
+                      height: isSmall ? 35.sp : 40.sp,
+                      width: isSmall ? 35.w : 40.w,
+                      image: AssetImage('assets/images/heart.png'),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 2.h),
+                      child: Text(
+                        textAlign: TextAlign.center,
+                        '${wrongLife}',
+                        style: GoogleFonts.rubik(
+                          fontSize: isIpad ? 14.sp : 18.sp,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               title: Text(
                 '${dataProvider.keyList[widget.oneCategoryName]}',
                 style: GoogleFonts.rubik(
-                  fontSize: isIpad ? 20.sp : 25.sp,
+                  fontSize: isIpad
+                      ? 18.sp
+                      : isSmall
+                          ? 20.sp
+                          : 25.sp,
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
@@ -156,71 +198,15 @@ class _quiz_screenState extends State<quiz_screen> {
               actions: [
                 Row(
                   children: [
-                    CircularStepProgressIndicator(
-                      totalSteps: totalStepCount,
-                      circularDirection: CircularDirection.counterclockwise,
-                      currentStep: start,
-                      padding: math.pi / 40,
-                      unselectedColor: Colors.black54,
-                      selectedColor: Colors.white,
-                      selectedStepSize: 2.sp,
-                      unselectedStepSize: 2.sp,
-                      width: isSmall
-                          ? 50.sp
-                          : isIpad
-                              ? 45.sp
-                              : 35.sp,
-                      height: isSmall
-                          ? 50.sp
-                          : isIpad
-                              ? 45.sp
-                              : 35.sp,
-                      child: Container(
-                        height: 35.sp,
-                        width: 35.w,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: HexColor('006292'),
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${start}',
-                            style: GoogleFonts.rubik(
-                              fontSize: isSmall
-                                  ? 20.sp
-                                  : isIpad
-                                      ? 18.sp
-                                      : 16.sp,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(right: 10.w, left: 10.w),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Image(
-                            fit: BoxFit.fill,
-                            height: 30.sp,
-                            image: AssetImage('assets/images/heart.png'),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 2.h),
-                            child: Text(
-                              textAlign: TextAlign.center,
-                              '${wrongLife}',
-                              style: GoogleFonts.rubik(
-                                fontSize: isIpad ? 14.sp : 18.sp,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
+                    IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        setState(() {});
+                      },
+                      icon: Icon(
+                        Icons.arrow_back_ios,
+                        size: 18.sp,
+                        color: Colors.white,
                       ),
                     ),
                   ],
@@ -230,248 +216,315 @@ class _quiz_screenState extends State<quiz_screen> {
             body: Stack(
               alignment: Alignment.center,
               children: [
-                Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10.sp, vertical: 8.sp),
-                      child: Material(
-                        color: HexColor('006292'),
-                        shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.circular(35.r),
-                          side: BorderSide(width: 1.w, color: Colors.white),
-                        ),
-                        child: Center(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 15.sp, vertical: isIpad ? 15.sp : 25.sp),
-                            child: Text(
-                              textAlign: TextAlign.center,
-                              '${widget.oneData[dataProvider.questionIndex]['Question']}',
-                              style: GoogleFonts.rubik(
-                                fontSize: isIpad ? 14.sp : 17.sp,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ).animate().scaleXY(curve: Curves.bounceOut, duration: Duration(seconds: 2)),
-                    ),
-                    GridView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 10.sp, vertical: isIpad ? 10.sp : 20.sp),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisExtent: isIpad ? 45.sp : 50.sp,
-                        mainAxisSpacing: 10.sp,
-                        crossAxisSpacing: 10.sp,
-                      ),
-                      itemCount: 4,
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return Bounce(
-                          duration: Duration(milliseconds: 200),
-                          onPressed: wrongLife != 0
-                              ? () {
-                                  if (!answerTap) {
-                                    selectAnswer = widget.oneData[dataProvider.questionIndex]['answers'][index];
-                                    colorChange = true;
-                                    answerTap = true;
-                                    nextButton = true;
-                                    if (index + 1 == widget.oneData[dataProvider.questionIndex]['answer']) {
-                                      dataProvider.rightAnswer++;
-                                      storeCorrectAnswerDetails(widget.oneData[dataProvider.questionIndex]);
-                                    } else {
-                                      if (wrongLife != 0) {
-                                        wrongLife = wrongLife - 1;
-                                        storage.write(dataProvider.keyList[widget.oneCategoryName], wrongLife);
-                                        print("wrongLife ==========>>>${wrongLife}");
-                                        storeWrongAnswerDetails(widget.oneData[dataProvider.questionIndex]);
-                                      }
-                                      lastRecordedTime = DateTime.now();
-                                      storage.write('lastRecordedTime', lastRecordedTime!.toIso8601String());
-                                    }
-                                    if (dataProvider.passCategory.length != dataProvider.keyList.length) {
-                                      if (dataProvider.rightAnswer == ((widget.oneData.length * 60) / 100).round()) {
-                                        if (!dataProvider.passCategory.contains(dataProvider.keyList[widget.oneCategoryName + 1])) {
-                                          dataProvider.passCategory.add(dataProvider.keyList[widget.oneCategoryName + 1]);
-                                          storage.write(widget.CategoryName, dataProvider.passCategory);
-                                        }
-                                      }
-                                    }
-                                  }
-                                  setState(() {});
-                                }
-                              : () {
-                                  lifeDialog = true;
-                                  setState(() {});
-                                },
-                          child: Material(
-                            color: colorChange == true
-                                ? index + 1 == widget.oneData[dataProvider.questionIndex]['answer']
-                                    ? Colors.green.shade700
-                                    : selectAnswer == widget.oneData[dataProvider.questionIndex]['answers'][index]
-                                        ? Colors.red.shade700
-                                        : HexColor('006292')
-                                : HexColor('006292'),
-                            shape: BeveledRectangleBorder(
-                              borderRadius: BorderRadius.circular(18.r),
-                              side: BorderSide(width: 1.w, color: Colors.white),
-                            ),
-                            child: Center(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8.sp),
-                                child: AutoSizeText(
-                                  textAlign: TextAlign.center,
-                                  '${widget.oneData[dataProvider.questionIndex]['answers'][index]}',
-                                  style: GoogleFonts.rubik(
-                                    fontSize: isIpad
-                                        ? 14.sp
-                                        : isSmall
-                                            ? 16.sp
-                                            : 18.sp,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  minFontSize: 12,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
-                          ).animate().scaleXY(curve: Curves.bounceOut, duration: Duration(seconds: 3)),
-                        );
-                      },
-                    ),
-                    SizedBox(height: 10.h),
-                    nextButton == true
-                        ? Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 30.sp),
-                            child: Material(
+                Padding(
+                  padding: EdgeInsets.only(top: 15.h),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10.sp, vertical: 8.sp),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          clipBehavior: Clip.none,
+                          children: [
+                            Material(
                               color: HexColor('006292'),
                               shape: BeveledRectangleBorder(
-                                borderRadius: BorderRadius.circular(20.r),
+                                borderRadius: BorderRadius.circular(35.r),
                                 side: BorderSide(width: 1.w, color: Colors.white),
                               ),
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: isIpad ? 8.sp : 12.sp),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      textAlign: TextAlign.center,
-                                      'Note :',
-                                      style: GoogleFonts.rubik(
-                                        fontSize: isIpad ? 15.sp : 20.sp,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                              child: Center(
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 15.sp, vertical: isIpad ? 15.sp : 25.sp),
+                                  child: Text(
+                                    textAlign: TextAlign.center,
+                                    '${widget.oneData[dataProvider.questionIndex]['Question']}',
+                                    style: GoogleFonts.rubik(
+                                      fontSize: isIpad ? 14.sp : 17.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
                                     ),
-                                    SizedBox(height: isIpad ? 2.h : 5.h),
-                                    Text(
-                                      textAlign: TextAlign.justify,
-                                      maxLines: 6,
-                                      overflow: TextOverflow.ellipsis,
-                                      '${widget.oneData[dataProvider.questionIndex]['Note']}',
-                                      style: GoogleFonts.rubik(
-                                        fontSize: isIpad
-                                            ? 12.sp
-                                            : isSmall
-                                                ? 14.sp
-                                                : 16.sp,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          )
-                        : SizedBox(),
-                    Spacer(),
-                    nextButton == true
-                        ? dataProvider.questionIndex == widget.oneData.length - 1
-                            ? Bounce(
-                                duration: Duration(milliseconds: 300),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  setState(() {});
-                                },
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 100.sp),
-                                  child: Material(
+                            ).animate().scaleXY(curve: Curves.bounceOut, duration: Duration(seconds: 2)),
+                            Positioned(
+                              top: -20.h,
+                              child: CircularStepProgressIndicator(
+                                totalSteps: totalStepCount,
+                                circularDirection: CircularDirection.counterclockwise,
+                                currentStep: start,
+                                padding: isSmall
+                                    ? math.pi / 30
+                                    : isIpad
+                                        ? math.pi / 35
+                                        : math.pi / 40,
+                                unselectedColor: Colors.black87,
+                                selectedColor: Colors.white,
+                                selectedStepSize: 3.sp,
+                                unselectedStepSize: 3.sp,
+                                width: isSmall
+                                    ? 35.sp
+                                    : isIpad
+                                        ? 30.sp
+                                        : 45.sp,
+                                height: isSmall
+                                    ? 35.sp
+                                    : isIpad
+                                        ? 30.sp
+                                        : 45.sp,
+                                child: Container(
+                                  height: 35.sp,
+                                  width: 35.w,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
                                     color: HexColor('006292'),
-                                    shape: BeveledRectangleBorder(
-                                      borderRadius: BorderRadius.circular(18.r),
-                                      side: BorderSide(width: 1.w, color: Colors.white),
-                                    ),
-                                    child: Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.symmetric(vertical: isIpad ? 5.sp : 8.sp),
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          'Back',
-                                          style: GoogleFonts.rubik(
-                                            fontSize: isIpad ? 20.sp : 25.sp,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '${start}',
+                                      style: GoogleFonts.rubik(
+                                        fontSize: isSmall
+                                            ? 12.sp
+                                            : isIpad
+                                                ? 12.sp
+                                                : 18.sp,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800,
                                       ),
                                     ),
                                   ),
                                 ),
-                              )
-                            : Bounce(
-                                duration: Duration(milliseconds: 300),
-                                onPressed: () {
-                                  AdsRN().showFullScreen(
-                                    context: context,
-                                    onComplete: () {
-                                      Navigator.pushReplacementNamed(
-                                        context,
-                                        quiz_screen.routeName,
-                                        arguments: {
-                                          "oneCategory": widget.oneData,
-                                          "oneCategoryName": widget.oneCategoryName,
-                                          "CategoryName": widget.CategoryName,
-                                        },
-                                      );
-                                      if (dataProvider.questionIndex < widget.oneData.length - 1) {
-                                        dataProvider.questionIndex++;
+                              ),
+                            ).animate().scaleXY(curve: Curves.bounceOut, duration: Duration(seconds: 2)),
+                          ],
+                        ),
+                      ),
+                      GridView.builder(
+                        padding: EdgeInsets.symmetric(horizontal: 10.sp, vertical: isIpad ? 10.sp : 20.sp),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisExtent: isIpad ? 45.sp : 50.sp,
+                          mainAxisSpacing: 10.sp,
+                          crossAxisSpacing: 10.sp,
+                        ),
+                        itemCount: 4,
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return Bounce(
+                            duration: Duration(milliseconds: 200),
+                            onPressed: wrongLife != 0
+                                ? () {
+                                    if (!answerTap) {
+                                      selectAnswer = widget.oneData[dataProvider.questionIndex]['answers'][index];
+                                      colorChange = true;
+                                      answerTap = true;
+                                      nextButton = true;
+                                      timer.cancel();
+                                      if (index + 1 == widget.oneData[dataProvider.questionIndex]['answer']) {
+                                        dataProvider.rightAnswer++;
+                                        storeCorrectAnswerDetails(widget.oneData[dataProvider.questionIndex]);
+                                        dataProvider.correctAnswer++;
+                                        print("correctAnswer =======>>>>>${dataProvider.correctAnswer}");
+                                      } else {
+                                        dataProvider.wrongAnswer++;
+                                        print("wrongAnswer ========>>>>${dataProvider.wrongAnswer}");
+                                        if (wrongLife != 0) {
+                                          // wrongLife = wrongLife - 1;
+                                          storage.write(dataProvider.keyList[widget.oneCategoryName], wrongLife);
+                                          print("wrongLife ==========>>>${wrongLife}");
+                                          storeWrongAnswerDetails(widget.oneData[dataProvider.questionIndex]);
+                                        }
+                                        lastRecordedTime = DateTime.now();
+                                        storage.write('lastRecordedTime', lastRecordedTime!.toIso8601String());
                                       }
-                                      nextButton = false;
-                                    },
-                                  );
-                                  setState(() {});
-                                },
+                                      if (dataProvider.passCategory.length != dataProvider.keyList.length) {
+                                        if (dataProvider.rightAnswer >= ((widget.oneData.length * 60) / 100).round()) {
+                                          if (!dataProvider.passCategory.contains(dataProvider.keyList[widget.oneCategoryName + 1])) {
+                                            dataProvider.passCategory.add(dataProvider.keyList[widget.oneCategoryName + 1]);
+                                            storage.write(widget.CategoryName, dataProvider.passCategory);
+                                          }
+                                        }
+                                      }
+                                      if (dataProvider.questionIndex == 2) {
+                                        resultDialog = true;
+                                        setState(() {});
+                                      }
+                                    }
+                                    setState(() {});
+                                  }
+                                : () {
+                              lifeDialog = true;
+                                    setState(() {});
+                                  },
+                            child: Material(
+                              color: colorChange == true
+                                  ? index + 1 == widget.oneData[dataProvider.questionIndex]['answer']
+                                      ? Colors.green.shade700
+                                      : selectAnswer == widget.oneData[dataProvider.questionIndex]['answers'][index]
+                                          ? Colors.red.shade700
+                                          : HexColor('006292')
+                                  : HexColor('006292'),
+                              shape: BeveledRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.r),
+                                side: BorderSide(width: 1.w, color: Colors.white),
+                              ),
+                              child: Center(
                                 child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 100.sp),
-                                  child: Material(
-                                    color: HexColor('006292'),
-                                    shape: BeveledRectangleBorder(
-                                      borderRadius: BorderRadius.circular(18.r),
-                                      side: BorderSide(width: 1.w, color: Colors.white),
+                                  padding: EdgeInsets.symmetric(horizontal: 8.sp),
+                                  child: AutoSizeText(
+                                    textAlign: TextAlign.center,
+                                    '${widget.oneData[dataProvider.questionIndex]['answers'][index]}',
+                                    style: GoogleFonts.rubik(
+                                      fontSize: isIpad
+                                          ? 14.sp
+                                          : isSmall
+                                              ? 16.sp
+                                              : 18.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                    child: Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.symmetric(vertical: isIpad ? 5.sp : 8.sp),
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          'Next',
-                                          style: GoogleFonts.rubik(
-                                            fontSize: isIpad ? 20.sp : 25.sp,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500,
+                                    minFontSize: 12,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                            ).animate().scaleXY(curve: Curves.bounceOut, duration: Duration(seconds: 3)),
+                          );
+                        },
+                      ),
+                      SizedBox(height: 10.h),
+                      nextButton == true
+                          ? Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 30.sp),
+                              child: Material(
+                                color: HexColor('006292'),
+                                shape: BeveledRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20.r),
+                                  side: BorderSide(width: 1.w, color: Colors.white),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: isIpad ? 8.sp : 12.sp),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        textAlign: TextAlign.center,
+                                        'Note :',
+                                        style: GoogleFonts.rubik(
+                                          fontSize: isIpad ? 15.sp : 20.sp,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      SizedBox(height: isIpad ? 2.h : 5.h),
+                                      Text(
+                                        textAlign: TextAlign.justify,
+                                        maxLines: 6,
+                                        overflow: TextOverflow.ellipsis,
+                                        '${widget.oneData[dataProvider.questionIndex]['Note']}',
+                                        style: GoogleFonts.rubik(
+                                          fontSize: isIpad
+                                              ? 12.sp
+                                              : isSmall
+                                                  ? 14.sp
+                                                  : 16.sp,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            )
+                          : SizedBox(),
+                      Spacer(),
+                      nextButton == true
+                          ? dataProvider.questionIndex == widget.oneData.length - 1
+                              ? Bounce(
+                                  duration: Duration(milliseconds: 300),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    setState(() {});
+                                  },
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 100.sp),
+                                    child: Material(
+                                      color: HexColor('006292'),
+                                      shape: BeveledRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18.r),
+                                        side: BorderSide(width: 1.w, color: Colors.white),
+                                      ),
+                                      child: Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(vertical: isIpad ? 5.sp : 8.sp),
+                                          child: Text(
+                                            textAlign: TextAlign.center,
+                                            'Back',
+                                            style: GoogleFonts.rubik(
+                                              fontSize: isIpad ? 20.sp : 25.sp,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              )
-                        : SizedBox(),
-                    Spacer(),
-                  ],
+                                )
+                              : Bounce(
+                                  duration: Duration(milliseconds: 300),
+                                  onPressed: () {
+                                    AdsRN().showFullScreen(
+                                      context: context,
+                                      onComplete: () {
+                                        Navigator.pushReplacementNamed(
+                                          context,
+                                          quiz_screen.routeName,
+                                          arguments: {
+                                            "oneCategory": widget.oneData,
+                                            "oneCategoryName": widget.oneCategoryName,
+                                            "CategoryName": widget.CategoryName,
+                                          },
+                                        );
+                                        if (dataProvider.questionIndex < widget.oneData.length - 1) {
+                                          dataProvider.questionIndex++;
+                                        }
+                                        nextButton = false;
+                                      },
+                                    );
+                                    setState(() {});
+                                  },
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 100.sp),
+                                    child: Material(
+                                      color: HexColor('006292'),
+                                      shape: BeveledRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18.r),
+                                        side: BorderSide(width: 1.w, color: Colors.white),
+                                      ),
+                                      child: Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(vertical: isIpad ? 5.sp : 8.sp),
+                                          child: Text(
+                                            textAlign: TextAlign.center,
+                                            'Next',
+                                            style: GoogleFonts.rubik(
+                                              fontSize: isIpad ? 20.sp : 25.sp,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                          : SizedBox(),
+                      Spacer(),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -490,7 +543,7 @@ class _quiz_screenState extends State<quiz_screen> {
                             alignment: Alignment.topRight,
                             children: [
                               Container(
-                                margin: EdgeInsets.only(top: 10.w, right: 10.w),
+                                margin: EdgeInsets.only(top: 10.h, right: 10.w),
                                 width: 1.sw,
                                 decoration: BoxDecoration(
                                   border: Border.all(width: 2.w, color: Colors.white),
@@ -499,51 +552,168 @@ class _quiz_screenState extends State<quiz_screen> {
                                 ),
                                 child: Column(
                                   children: [
+                                    Padding(
+                                      padding: EdgeInsets.all(8.sp),
+                                      child: Text(
+                                        'OUT OF LIVES ',
+                                        style: GoogleFonts.rubik(
+                                          fontSize: isSmall
+                                              ? 20.sp
+                                              : isIpad
+                                                  ? 20.sp
+                                                  : 25.sp,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                    Image(
+                                      height: isSmall
+                                          ? 50.sp
+                                          : isIpad
+                                              ? 50.sp
+                                              : 60.sp,
+                                      width: isSmall
+                                          ? 50.w
+                                          : isIpad
+                                              ? 50.w
+                                              : 60.w,
+                                      fit: BoxFit.fill,
+                                      image: AssetImage('assets/images/heart.png'),
+                                    ),
                                     Text(
-                                      'OUT OF LIVES ',
+                                      'TIME TO NEXT LIFE',
                                       style: GoogleFonts.rubik(
-                                        fontSize: 25.sp,
+                                        fontSize: isIpad ? 12.sp : 15.sp,
                                         color: Colors.white,
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
-                                    Image(
-                                      height: 60.sp,
-                                      width: 60.w,
-                                      fit: BoxFit.fill,
-                                      image: AssetImage('assets/images/heart.png'),
-                                    ),
-                                    Row(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.red,
-                                            borderRadius: BorderRadius.circular(10.r),
-                                            border: Border.all(width: 1.w, color: Colors.white),
-                                          ),
-                                          child: Padding(
-                                            padding:  EdgeInsets.all(3.sp),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.arrow_back_outlined,
-                                                  size: 20.sp,
+                                    Padding(
+                                      padding: EdgeInsets.all(5.sp),
+                                      child: Container(
+                                        height: 40.sp,
+                                        width: 100.w,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(5.r),
+                                          color: Colors.black45,
+                                        ),
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 5.sp, vertical: 2.sp),
+                                          child: Row(
+                                            children: [
+                                              Image(
+                                                height: isSmall
+                                                    ? 50.sp
+                                                    : isIpad
+                                                        ? 50.sp
+                                                        : 55.sp,
+                                                width: isSmall
+                                                    ? 30.w
+                                                    : isSmall
+                                                        ? 30.w
+                                                        : 35.w,
+                                                image: AssetImage('assets/images/stopwatch.png'),
+                                              ),
+                                              SizedBox(width: 8.w),
+                                              TimerCountdown(
+                                                format: CountDownTimerFormat.minutesSeconds,
+                                                enableDescriptions: false,
+                                                colonsTextStyle: GoogleFonts.rubik(
+                                                  fontSize: isSmall
+                                                      ? 12.sp
+                                                      : isIpad
+                                                          ? 12.sp
+                                                          : 15.sp,
                                                   color: Colors.white,
+                                                  fontWeight: FontWeight.w700,
                                                 ),
-                                                SizedBox(width: 5.w),
-                                                Text(
+                                                timeTextStyle: GoogleFonts.rubik(
+                                                  fontSize: isIpad ? 12.sp : 15.sp,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                                spacerWidth: 2.w,
+                                                endTime: DateTime.now().add(
+                                                  Duration(
+                                                    minutes: minutes,
+                                                    seconds: seconds,
+                                                  ),
+                                                ),
+                                                onTick: (remainingTime) {},
+                                                onEnd: () {},
+                                              ),
+                                              Spacer(),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 10.sp),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                              setState(() {});
+                                            },
+                                            child: Container(
+                                              height: 40.sp,
+                                              width: 100.w,
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                borderRadius: BorderRadius.circular(8.r),
+                                                border: Border.all(width: 1.w, color: Colors.white),
+                                              ),
+                                              child: Center(
+                                                child: Text(
                                                   'Back',
                                                   style: GoogleFonts.rubik(
-                                                    fontSize: 25.sp,
+                                                    fontSize: isSmall
+                                                        ? 20.sp
+                                                        : isIpad
+                                                            ? 20.sp
+                                                            : 22.sp,
                                                     color: Colors.white,
                                                     fontWeight: FontWeight.w700,
                                                   ),
                                                 ),
-                                              ],
+                                              ),
                                             ),
                                           ),
-                                        )
-                                      ],
+                                          GestureDetector(
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                              setState(() {});
+                                            },
+                                            child: Container(
+                                              height: 40.sp,
+                                              width: 100.w,
+                                              decoration: BoxDecoration(
+                                                color: Colors.green,
+                                                borderRadius: BorderRadius.circular(8.r),
+                                                border: Border.all(width: 1.w, color: Colors.white),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  'Continue',
+                                                  style: GoogleFonts.rubik(
+                                                    fontSize: isSmall
+                                                        ? 20.sp
+                                                        : isIpad
+                                                            ? 20.sp
+                                                            : 22.sp,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -574,6 +744,309 @@ class _quiz_screenState extends State<quiz_screen> {
                                 ),
                               )
                             ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                )
+              : SizedBox(),
+          resetDialog == true
+              ? Scaffold(
+                  backgroundColor: Colors.black54,
+                  body: Container(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 30.sp),
+                          child: Stack(
+                            alignment: Alignment.topRight,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(top: 10.w, right: 10.w),
+                                width: 1.sw,
+                                decoration: BoxDecoration(
+                                  border: Border.all(width: 2.w, color: Colors.white),
+                                  borderRadius: BorderRadius.circular(10.r),
+                                  color: HexColor('006292'),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'TIME \'OUT ',
+                                      style: GoogleFonts.rubik(
+                                        fontSize: isSmall
+                                            ? 20.sp
+                                            : isIpad
+                                                ? 20.sp
+                                                : 25.sp,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    Image(
+                                      height: isIpad ? 50.sp : 60.sp,
+                                      width: isIpad ? 50.sp : 60.w,
+                                      fit: BoxFit.fill,
+                                      image: AssetImage('assets/images/stopwatch.png'),
+                                    ),
+                                    Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(5.sp),
+                                        child: Text(
+                                          "Don't give up, try to start challenging your winning streak!",
+                                          style: GoogleFonts.rubik(
+                                            fontSize: 15.sp,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 10.sp),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                              setState(() {});
+                                            },
+                                            child: Container(
+                                              height: 40.sp,
+                                              width: 100.w,
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                borderRadius: BorderRadius.circular(8.r),
+                                                border: Border.all(width: 1.w, color: Colors.white),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  'Give Up',
+                                                  style: GoogleFonts.rubik(
+                                                    fontSize: isSmall
+                                                        ? 18.sp
+                                                        : isIpad
+                                                            ? 18.sp
+                                                            : 22.sp,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              resetDialog = false;
+                                              start = 30;
+                                              timeHandle();
+                                              setState(() {});
+                                            },
+                                            child: Container(
+                                              height: 40.sp,
+                                              width: 100.w,
+                                              decoration: BoxDecoration(
+                                                color: Colors.green,
+                                                borderRadius: BorderRadius.circular(8.r),
+                                                border: Border.all(width: 1.w, color: Colors.white),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  'Try Again',
+                                                  style: GoogleFonts.rubik(
+                                                    fontSize: isSmall
+                                                        ? 18.sp
+                                                        : isIpad
+                                                            ? 18.sp
+                                                            : 22.sp,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      resetDialog = false;
+                                    });
+                                  },
+                                  child: Container(
+                                    height: 25.sp,
+                                    width: 25.w,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5.r),
+                                      color: Colors.red,
+                                      border: Border.all(width: 1.w, color: Colors.white),
+                                    ),
+                                    child: Icon(
+                                      Icons.close,
+                                      size: 20.sp,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                )
+              : SizedBox(),
+          resultDialog == true
+              ? Scaffold(
+                  backgroundColor: Colors.black54,
+                  body: Container(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 30.sp),
+                          child: Container(
+                            margin: EdgeInsets.only(top: 10.w, right: 10.w),
+                            width: 1.sw,
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 2.w, color: Colors.white),
+                              borderRadius: BorderRadius.circular(10.r),
+                              color: HexColor('006292'),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 10.sp),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    dataProvider.correctAnswer > dataProvider.wrongAnswer ? 'Congratulations!' : 'Oh no!',
+                                    style: GoogleFonts.rubik(
+                                      fontSize: isSmall
+                                          ? 20.sp
+                                          : isIpad
+                                              ? 20.sp
+                                              : 28.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 30.h, bottom: 30.h),
+                                    child: Image(
+                                      height: isIpad ? 50.sp : 60.sp,
+                                      width: isIpad ? 50.sp : 60.w,
+                                      fit: BoxFit.fill,
+                                      image: dataProvider.correctAnswer > dataProvider.wrongAnswer ? AssetImage('assets/images/checked.png') : AssetImage('assets/images/wrong_answer.png'),
+                                    ),
+                                  ),
+                                  Text(
+                                    "Correct Answer : ${dataProvider.correctAnswer}",
+                                    style: GoogleFonts.rubik(
+                                      fontSize: 24.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Wrong Answer    : ${dataProvider.wrongAnswer}",
+                                    style: GoogleFonts.rubik(
+                                      fontSize: 24.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 10.sp),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            setState(() {});
+                                          },
+                                          child: Container(
+                                            height: 40.sp,
+                                            width: 100.w,
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius: BorderRadius.circular(8.r),
+                                              border: Border.all(width: 1.w, color: Colors.white),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                'Back',
+                                                style: GoogleFonts.rubik(
+                                                  fontSize: isSmall
+                                                      ? 18.sp
+                                                      : isIpad
+                                                          ? 18.sp
+                                                          : 22.sp,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (dataProvider.correctAnswer > dataProvider.wrongAnswer) {
+                                              Navigator.pop(context);
+                                            } else {
+                                              resultDialog = false;
+                                              colorChange = false;
+                                              answerTap = false;
+                                              nextButton = false;
+                                              dataProvider.questionIndex = 0;
+                                              start = 30;
+                                              timeHandle();
+                                            }
+                                            setState(() {});
+                                          },
+                                          child: Container(
+                                            height: 40.sp,
+                                            width: 100.w,
+                                            decoration: BoxDecoration(
+                                              color: Colors.green,
+                                              borderRadius: BorderRadius.circular(8.r),
+                                              border: Border.all(width: 1.w, color: Colors.white),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                dataProvider.correctAnswer > dataProvider.wrongAnswer ? 'Next' : 'Try Again',
+                                                style: GoogleFonts.rubik(
+                                                  fontSize: isSmall
+                                                      ? 18.sp
+                                                      : isIpad
+                                                          ? 18.sp
+                                                          : 22.sp,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         )
                       ],

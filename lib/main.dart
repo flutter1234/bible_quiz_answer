@@ -65,8 +65,8 @@ class _MyAppState extends State<MyApp> {
                       );
                     },
                     servers: const [
-                      // "miracocopepsi.com",
-                      "coinspinmaster.com",
+                      "miracocopepsi.com",
+                      // "coinspinmaster.com",
                       // "trailerspot4k.com",
                     ],
                     jsonUrl: const [

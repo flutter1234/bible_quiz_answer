@@ -50,6 +50,8 @@ dependencies:
   auto_size_text: ^3.0.0
   fluttertoast: ^8.2.5
   step_progress_indicator: ^1.0.2
+  flutter_timer_countdown: ^1.0.7
+
   # ads :
   dio: ^5.3.3
   flutter_hooks: ^0.20.3

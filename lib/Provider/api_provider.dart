@@ -14,6 +14,8 @@ class Api extends ChangeNotifier {
   List keyList = [];
   List wrongAnswersDetailsList = [];
   List correctAnswersDetailsList = [];
+  int correctAnswer = 0;
+  int wrongAnswer = 0;
 
 
 

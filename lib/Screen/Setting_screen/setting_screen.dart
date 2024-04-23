@@ -1,8 +1,6 @@
 import 'package:bible_quiz_answer/AdPlugin/Ads/Banner/BannerWrapper.dart';
-import 'package:bible_quiz_answer/AdPlugin/Ads/FullScreen/Ads.dart';
 import 'package:bible_quiz_answer/AdPlugin/MainJson/MainJson.dart';
 import 'package:bible_quiz_answer/Provider/api_provider.dart';
-import 'package:bible_quiz_answer/Screen/History_screen/history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -253,58 +251,7 @@ class _setting_screenState extends State<setting_screen> {
                   ),
                 ),
               ), //4
-              GestureDetector(
-                onTap: () {
-                  AdsRN().showFullScreen(
-                    context: context,
-                    onComplete: () {
-                      Navigator.pushNamed(context, history_screen.routeName);
-                    },
-                  );
-                  setState(() {});
-                },
-                child: Padding(
-                  padding: EdgeInsets.only(top: 15.h),
-                  child: Container(
-                    height: 45.sp,
-                    width: 1.sw,
-                    decoration: BoxDecoration(
-                      border: Border.all(width: 1.w, color: Colors.white),
-                      borderRadius: BorderRadius.circular(8.r),
-                      color: Colors.black45,
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10.sp),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.history_sharp,
-                            size: isIpad
-                                ? 30.sp
-                                : isSmall
-                                    ? 30.sp
-                                    : 32.sp,
-                            color: Colors.grey.shade300,
-                          ),
-                          SizedBox(width: 20.w),
-                          Text(
-                            'History',
-                            style: GoogleFonts.rubik(
-                              fontSize: isIpad
-                                  ? 22.sp
-                                  : isSmall
-                                      ? 22.sp
-                                      : 24.sp,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ), //5
+
               Spacer(
                 flex: 5,
               ),
