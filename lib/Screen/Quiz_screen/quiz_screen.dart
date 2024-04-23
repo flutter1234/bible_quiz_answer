@@ -118,8 +118,8 @@ class _quiz_screenState extends State<quiz_screen> {
         print("currentTime =======>>>${currentTime}");
         int timeDifference = currentTime.difference(storedLastRecordedTime).inMinutes;
         print("time difference: $timeDifference");
-        if (timeDifference >= 5) {
-          int increments = timeDifference ~/ 5;
+        if (timeDifference >= 6) {
+          int increments = timeDifference ~/ 6;
           print("increment =======>>>${increments}");
           int updatedLife = wrongLife + increments;
           if (updatedLife <= 5) {
@@ -143,7 +143,8 @@ class _quiz_screenState extends State<quiz_screen> {
   @override
   Widget build(BuildContext context) {
     Api dataProvider = Provider.of<Api>(context, listen: true);
-    int minutes = (currentTime ~/ 60) % 60;
+    int minutes = (currentTime ~/ 60) ~/ 10;
+    print("minutes ====>>${minutes}");
     int seconds = currentTime % 60;
     return BannerWrapper(
       parentContext: context,
@@ -330,7 +331,7 @@ class _quiz_screenState extends State<quiz_screen> {
                                         dataProvider.wrongAnswer++;
                                         print("wrongAnswer ========>>>>${dataProvider.wrongAnswer}");
                                         if (wrongLife != 0) {
-                                          // wrongLife = wrongLife - 1;
+                                          wrongLife = wrongLife - 1;
                                           storage.write(dataProvider.keyList[widget.oneCategoryName], wrongLife);
                                           print("wrongLife ==========>>>${wrongLife}");
                                           storeWrongAnswerDetails(widget.oneData[dataProvider.questionIndex]);
@@ -346,7 +347,7 @@ class _quiz_screenState extends State<quiz_screen> {
                                           }
                                         }
                                       }
-                                      if (dataProvider.questionIndex == 2) {
+                                      if (dataProvider.questionIndex == widget.oneData.length - 1) {
                                         resultDialog = true;
                                         setState(() {});
                                       }
@@ -354,7 +355,7 @@ class _quiz_screenState extends State<quiz_screen> {
                                     setState(() {});
                                   }
                                 : () {
-                              lifeDialog = true;
+                                    lifeDialog = true;
                                     setState(() {});
                                   },
                             child: Material(
