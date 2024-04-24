@@ -144,7 +144,6 @@ class _quiz_screenState extends State<quiz_screen> {
   Widget build(BuildContext context) {
     Api dataProvider = Provider.of<Api>(context, listen: true);
     int minutes = (currentTime ~/ 60) ~/ 10;
-    print("minutes ====>>${minutes}");
     int seconds = currentTime % 60;
     return BannerWrapper(
       parentContext: context,

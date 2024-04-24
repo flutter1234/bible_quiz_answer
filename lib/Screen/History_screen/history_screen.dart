@@ -39,9 +39,9 @@ class _history_screenState extends State<history_screen> {
           toolbarHeight: isIpad ? 30.sp : 35.sp,
           centerTitle: true,
           backgroundColor: Colors.transparent,
-          leading: Padding(
-            padding: EdgeInsets.only(left: isIpad ? 10.w : 0),
-            child: IconButton(
+          leading: Text(''),
+          actions: [
+            IconButton(
               onPressed: () {
                 Navigator.pop(context);
                 setState(() {});
@@ -52,7 +52,7 @@ class _history_screenState extends State<history_screen> {
                 color: Colors.white,
               ),
             ),
-          ),
+          ],
           title: Text(
             'History',
             style: GoogleFonts.rubik(

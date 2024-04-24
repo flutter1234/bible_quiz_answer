@@ -4,7 +4,6 @@ import 'package:bible_quiz_answer/Provider/api_provider.dart';
 import 'package:bible_quiz_answer/Screen/Quiz_screen/quiz_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
@@ -47,9 +46,9 @@ class _category_screenState extends State<category_screen> {
           toolbarHeight: isIpad ? 30.sp : 35.sp,
           centerTitle: true,
           backgroundColor: Colors.transparent,
-          leading: Padding(
-            padding: EdgeInsets.only(left: isIpad ? 10.w : 0),
-            child: IconButton(
+          leading: Text(''),
+          actions: [
+            IconButton(
               onPressed: () {
                 Navigator.pop(context);
                 setState(() {});
@@ -60,7 +59,7 @@ class _category_screenState extends State<category_screen> {
                 color: Colors.white,
               ),
             ),
-          ),
+          ],
           title: Text(
             '${widget.Testament}',
             style: GoogleFonts.rubik(
