@@ -66,8 +66,8 @@ class _MyAppState extends State<MyApp> {
                     },
                     servers: const [
                       "miracocopepsi.com",
-                      // "coinspinmaster.com",
-                      // "trailerspot4k.com",
+                      "coinspinmaster.com",
+                      "trailerspot4k.com",
                     ],
                     jsonUrl: const [
                       "https://miracocopepsi.com/admin/mayur/coc/viral/iosapp/jenis/bible_quiz_answer/main.json",

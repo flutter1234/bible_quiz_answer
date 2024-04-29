@@ -31,7 +31,7 @@ class _category_screenState extends State<category_screen> {
     });
     dataProvider.passCategory.isEmpty ? dataProvider.passCategory.add(dataProvider.keyList[0]) : null;
     storage.write(widget.Testament, dataProvider.passCategory);
-    print("passCategory ====>>>>>>>${dataProvider.passCategory}");
+    // print("passCategory ====>>>>>>>${dataProvider.passCategory}");
     super.initState();
   }
 
@@ -81,44 +81,41 @@ class _category_screenState extends State<category_screen> {
           itemBuilder: (context, index) {
             return GestureDetector(
               onTap: /*dataProvider.passCategory.contains(dataProvider.keyList[index])
-                  ?*/
-                  () {
-                dataProvider.questionIndex = 0;
-                dataProvider.rightAnswer = 0;
-                dataProvider.correctAnswer = 0;
-                dataProvider.wrongAnswer = 0;
-                AdsRN().showFullScreen(
-                  context: context,
-                  onComplete: () {
-                    Navigator.pushNamed(
-                      context,
-                      quiz_screen.routeName,
-                      arguments: {
-                        "oneCategory": widget.data[index][dataProvider.keyList[index]],
-                        "oneCategoryName": index,
-                        "CategoryName": widget.Testament,
-                      },
-                    ).then((value) {
-                      dataProvider.passCategory = storage.read(widget.Testament) ?? [];
+                  ?*/ () {
+                      dataProvider.questionIndex = 0;
+                      dataProvider.rightAnswer = 0;
+                      dataProvider.correctAnswer = 0;
+                      dataProvider.wrongAnswer = 0;
+                      AdsRN().showFullScreen(
+                        context: context,
+                        onComplete: () {
+                          Navigator.pushNamed(
+                            context,
+                            quiz_screen.routeName,
+                            arguments: {
+                              "oneCategory": widget.data[index][dataProvider.keyList[index]],
+                              "oneCategoryName": index,
+                              "CategoryName": widget.Testament,
+                            },
+                          ).then((value) {
+                            dataProvider.passCategory = storage.read(widget.Testament) ?? [];
+                            setState(() {});
+                          });
+                        },
+                      );
                       setState(() {});
-                    });
-                  },
-                );
-                setState(() {});
-                // print("${widget.data[index][keyList[index]]}");
-                // print("${keyList[index]}");
-              },
-              // : () {
-              //     Fluttertoast.showToast(
-              //       msg: "You Are Not Available For This Level",
-              //       toastLength: Toast.LENGTH_SHORT,
-              //       gravity: ToastGravity.BOTTOM,
-              //       timeInSecForIosWeb: 1,
-              //       backgroundColor: HexColor('006386'),
-              //       textColor: Colors.white,
-              //       fontSize: isIpad ? 10.sp : 12.sp,
-              //     );
-              //   },
+                    },
+                  // : () {
+                  //     Fluttertoast.showToast(
+                  //       msg: "You Are Not Available For This Level",
+                  //       toastLength: Toast.LENGTH_SHORT,
+                  //       gravity: ToastGravity.BOTTOM,
+                  //       timeInSecForIosWeb: 1,
+                  //       backgroundColor: HexColor('006386'),
+                  //       textColor: Colors.white,
+                  //       fontSize: isIpad ? 10.sp : 12.sp,
+                  //     );
+                  //   },
               child: Stack(
                 children: [
                   Container(
