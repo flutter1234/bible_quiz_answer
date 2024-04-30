@@ -17,7 +17,6 @@ import 'package:provider/provider.dart';
 
 Future<void> main() async {
   runApp(MyApp());
-
   await GetStorage.init();
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
