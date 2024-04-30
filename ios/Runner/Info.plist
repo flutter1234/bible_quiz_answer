@@ -28,6 +28,10 @@
 	<string>ca-app-pub-7243817355824172~3172540700</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your location is required for benefits for you</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Recording sound annotations requires the microphone.</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>This identifier will be used to deliver personalized ads to you.</string>
 	<key>SKAdNetworkItems</key>
